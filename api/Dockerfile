@@ -1,4 +1,4 @@
-FROM python:3.8.13-alpine
+FROM python:3.9
 
 # set working directory
 WORKDIR /usr/src/api

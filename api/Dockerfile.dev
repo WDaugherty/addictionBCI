@@ -1,4 +1,4 @@
-FROM python:3.8.13-alpine
+FROM python:3.9
 
 # Setup a spot for the api code
 WORKDIR /usr/src/api
