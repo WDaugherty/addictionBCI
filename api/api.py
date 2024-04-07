@@ -8,15 +8,6 @@ import os
 
 load_dotenv()
 
-neurosity = NeurositySDK({
-    "device_id": os.getenv("NEUROSITY_DEVICE_ID")
-})
-
-neurosity.login({
-    "email": os.getenv("NEUROSITY_EMAIL"),
-    "password": os.getenv("NEUROSITY_PASSWORD")
-})
-
 
 api_blueprint = Blueprint('api', __name__)
 api = Api(api_blueprint)
@@ -36,8 +27,7 @@ class Call(Resource):
         answer = dict(random_number=(randint(0, 100)))
         return answer, 200
 
-class R2R(Resource):
-    def post(self):
+def r2r(data):
         # URL of the external API endpoint you want to call
         api_url = "https://sciphi-00a22a29-a66f-4564-912d-cf783fc8c3bd-qwpin2swwa-ue.a.run.app/search"
 
@@ -52,16 +42,32 @@ class R2R(Resource):
         return response.json(), response.status_code
 
 class Neurosity(Resource):
-        def get (self):
-            # Define the Neurosity API URL for the /search endpoint
-            api_url = "https://api.neurosity.co"
-            
-            # Set your API key here
-            api_key
+        def post (self):
 
-            return 
+            print("Starting neurosity")
+            neurosity = NeurositySDK({
+                "device_id": os.getenv("NEUROSITY_DEVICE_ID")
+            })
+
+            neurosity.login({
+                "email": os.getenv("NEUROSITY_EMAIL"),
+                "password": os.getenv("NEUROSITY_PASSWORD")
+            })
+
+
+
+            def callback(data):
+                print("data", data)
+                # Launch drone
+                r2r()
+
+                # { probability: 0.92, label: "leftArm", timestamp: 1569961321191, type: "kinesis"  }
+
+            print("Neurosity unsubscribe")
+            unsubscribe = neurosity.kinesis("leftHandPinch", callback)
+
+            return unsubscribe
 
 api.add_resource(Neurosity, '/api/neurosity')
-api.add_resource(R2R, '/api/r2r')
 api.add_resource(ApiPing, '/api/ping')
 api.add_resource(Call, '/api/call')

@@ -4,10 +4,5 @@ Flask-Cors
 Flask-RESTful
 gunicorn
 requests
-<<<<<<< HEAD
 python-dotenv
-=======
 r2r[all]
-
->>>>>>> 9eac859 (commit)
-

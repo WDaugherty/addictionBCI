@@ -1,48 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import logo from "./logo.svg";
 import "./App.css";
 
-// Function to call a sample API
-const callApi = async () => {
+// Function to call the R2R API with streaming
+const callNeurosity = async (setApiRes) => {
   const apiHostname = process.env.REACT_APP_API_HOSTNAME;
   const apiUrl = apiHostname
-    ? `https://${apiHostname}/api/call`
-    : "http://localhost:5001/api/call";
-  return axios.get(apiUrl).then((resp) => resp.data);
-};
+    ? `https://${apiHostname}/api/neurosity`
+    : "http://localhost:5001/api/neurosity";
 
-// Function to call the R2R API with POST
-const callR2R = async () => {
-  const apiHostname = process.env.REACT_APP_API_HOSTNAME;
-  const apiUrl = apiHostname
-    ? `https://${apiHostname}/api/r2r`
-    : "http://localhost:5001/api/r2r";
-  
-  // Assuming you need to send some data with the POST request
-  const data = {'query': 'Help me prevent the need to smoke again?'};
+  const data = { query: "Help me prevent the need to smoke again?" };
+  const response = await axios.post(apiUrl, data, {
+    responseType: "stream",
+  });
 
-  return axios.post(apiUrl, data).then((resp) => resp.data);
+  const reader = response.data.getReader();
+  const decoder = new TextDecoder();
+  let result = "";
+
+  // Read streamed chunks
+  const readChunk = async () => {
+    const { done, value } = await reader.read();
+    if (done) return;
+
+    const chunk = decoder.decode(value);
+    result += chunk;
+    setApiRes(result); // Update the UI with the streamed data
+
+    // Recursively read the next chunk
+    readChunk();
+  };
+
+  readChunk();
 };
 
 function App() {
-  const [apiRes, setApiRes] = useState(-1);
+  const [apiRes, setApiRes] = useState("");
 
   const handleClick = async (e) => {
     e.preventDefault();
-    const res = await callR2R();
-    setApiRes(res["random_number"]);  // Make sure to access the correct property from the response
+    await callNeurosity(setApiRes);
   };
 
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          <button onClick={handleClick}>Call the API</button>
-        </p>
-        {apiRes >= 0 && <p>Result from API: {apiRes}</p>}
+        <nav>
+          <div className="nav-container">
+            <h1>News Site</h1>
+            <ul>
+              <li>Home</li>
+              <li>World</li>
+              <li>Politics</li>
+              <li>Business</li>
+              <li>Technology</li>
+            </ul>
+          </div>
+        </nav>
       </header>
+      <main>
+        <div className="main-container">
+          <h2>Latest News</h2>
+          <button onClick={handleClick}>Get News</button>
+          {apiRes && (
+            <article>
+              <pre>{apiRes}</pre>
+            </article>
+          )}
+        </div>
+      </main>
+      <footer>
+        <div className="footer-container">
+          <p>&copy; 2023 News Site. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
