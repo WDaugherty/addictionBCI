@@ -4,4 +4,5 @@ Flask-Cors
 Flask-RESTful
 gunicorn
 requests
+python-dotenv
 

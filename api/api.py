@@ -1,6 +1,6 @@
 from random import randint
 import requests
-from flask import Blueprint
+from flask import Flask, request, Blueprint
 from flask_restful import Resource, Api
 from neurosity import NeurositySDK
 from dotenv import load_dotenv
@@ -37,14 +37,19 @@ class Call(Resource):
         return answer, 200
 
 class R2R(Resource):
-    def get(self, query):
-        # Define the SciPhi API URL for the /search endpoint
+    def post(self):
+        # URL of the external API endpoint you want to call
         api_url = "https://sciphi-00a22a29-a66f-4564-912d-cf783fc8c3bd-qwpin2swwa-ue.a.run.app/search"
-        
-        data = {'query': 'Help me prevent the need to smoke again?'}
 
+        # Get data from the incoming POST request
+        data = request.get_json(force=True)  # Corrected this line
+
+        # Forward the request to the external API
         response = requests.post(api_url, json=data)
-        return response
+
+        print("Response from external API: ", response.json())
+        # Return the response from the external API to the client
+        return response.json(), response.status_code
 
 class Neurosity(Resource):
         def get (self):
